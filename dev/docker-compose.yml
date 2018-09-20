@@ -1,0 +1,48 @@
+version: "2"
+ 
+services:
+  dp:
+    build:
+      context: ..
+      dockerfile: "./build/Dockerfile"
+      args:
+        image_type: php-apache-dev
+    container_name: dp
+    ports:
+      - "1080:80"
+      - "1443:443"
+    restart: always
+    volumes:
+      - ../app/download:/app/download
+      - ../app/src:/app/src
+    links:
+      - db_dp
+    environment:
+      - DB_DP_HOSTNAME=${DB_DP_HOSTNAME}
+      - DB_DP_DATABASE=${DB_DP_DATABASE}
+      - DB_DP_USERNAME=${DB_DP_USERNAME}
+      - DB_DP_PASSWORD=${DB_DP_PASSWORD}
+
+  db_dp:
+    image: mysql:5.7
+    container_name: dp_db
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_DP_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_DP_DATABASE}
+      - MYSQL_USER=${DB_DP_USERNAME}
+      - MYSQL_PASSWORD=${DB_DP_PASSWORD}
+    restart: always
+    ports:
+      - "43306:3306"
+    volumes:
+      - db-dp-volume:/var/lib/mysql
+
+volumes:
+  db-dp-volume: {}
+ 
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.200.160/28
